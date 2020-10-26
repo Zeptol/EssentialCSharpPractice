@@ -258,6 +258,23 @@ end
 
             WriteLine("{0,-12:N0}{0}", 12345);//left align with 12 column wide
 
+            LinqExample.GroupKeywords();
+            WriteLine();
+            LinqExample.GroupKeywords2();
+            WriteLine();
+            LinqExample.ListMemberNames();
+            WriteLine();
+
+            TestBinarySearch();
+
+            var colorMap = new Dictionary<string, ConsoleColor>
+            {
+                ["Error"] = ConsoleColor.Red,
+                ["Warning"] = ConsoleColor.Yellow,
+                ["Info"] = ConsoleColor.Green
+            };
+            colorMap["Verbose"] = ConsoleColor.White;
+            colorMap["Error"] = ConsoleColor.Cyan;
 
             //AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             //var token = new CancellationTokenSource();
@@ -350,6 +367,24 @@ end
         static void TestReference(Cat c)
         {
             c.StarPoint = 1666;
+        }
+
+        static void TestBinarySearch()
+        {
+            var list = new List<string> { "public", "protected", "private" };
+            list.Sort();
+            var search = list.BinarySearch("private protected");
+            if (search < 0)
+            {
+                list.Insert(~search, "private protected");
+            }
+
+            foreach (var modifier in list)
+            {
+                Write($"{modifier}{(list.Last() == modifier ? null : ",")}");
+            }
+
+            WriteLine();
         }
     }
 }
