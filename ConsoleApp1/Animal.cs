@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
-using System.Text;
+using System.Runtime.CompilerServices;
 
 namespace ConsoleApp1
 {
@@ -61,7 +63,7 @@ namespace ConsoleApp1
         public Lazy<Stream> FileStreamLazy { get; set; } =
             new Lazy<Stream>(() => new FileStream("", FileMode.OpenOrCreate));
 
-        public static void Method<T>(T first, params T[] values) where T:IComparable<T>
+        public static void Method<T>(T first, params T[] values) where T : IComparable<T>
         {
 
         }
@@ -76,20 +78,70 @@ namespace ConsoleApp1
         }
     }
 
-    class SubTree<T,TU>:BinaryTree<T> where T : IComparable<T>
+    class SubTree<T, TU> : BinaryTree<T> where T : IComparable<T>
     {
-        
+        public SubTree(T value) : base(value)
+        {
+        }
     }
-    class BinaryTree<T> where T:IComparable<T>
+    class BinaryTree<T> : IEnumerable<T> where T : IComparable<T>
     {
-        
+        public BinaryTree(T value)
+        {
+            Value = value;
+        }
+
+        public T Value { get; }
+        public Pair<BinaryTree<T>> SubItems { get; set; }
+        [IndexerName("entry")]
+        public BinaryTree<T> this[params PairItem[] branches]
+        {
+            get
+            {
+                var currentNode = this;
+                int totalLevels = branches?.Length ?? 0;
+                int currentLevel = 0;
+                while (currentLevel < totalLevels)
+                {
+                    Debug.Assert(branches != null, nameof(branches) + " != null");
+                    currentNode = currentNode.SubItems[branches[currentLevel]];
+                    if (currentNode == null)
+                    {
+                        throw new IndexOutOfRangeException();
+                    }
+                    currentLevel++;
+                }
+
+                return currentNode;
+            }
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            yield return Value;
+            foreach (var tree in SubItems)
+            {
+                if (tree != null)
+                {
+                    foreach (T item in tree)
+                    {
+                        yield return item;
+                    }
+                }
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
     }
 
     interface ICompareThings<in T>
     {
         bool FirstIsBetter(T t1, T t2);
     }
-    class Contact : PdaItem,IListable
+    class Contact : PdaItem, IListable
     {
         private Person InternalPerson { get; set; }
 
@@ -127,7 +179,7 @@ namespace ConsoleApp1
         }
     }
 
-    abstract class PdaItem:IComparable
+    abstract class PdaItem : IComparable
     {
         public PdaItem(string name)
         {

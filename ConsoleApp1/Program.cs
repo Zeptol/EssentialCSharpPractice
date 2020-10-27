@@ -276,6 +276,48 @@ end
             colorMap["Verbose"] = ConsoleColor.White;
             colorMap["Error"] = ConsoleColor.Cyan;
 
+            var stack = new Stack<string>();
+            stack.Push("qqq");
+            var top = stack.Peek();
+            using (var enumerator = stack.GetEnumerator())
+            {
+                while (enumerator.MoveNext())
+                {
+                    WriteLine(enumerator.Current);
+                }
+            }
+
+            var q=new Queue<string>();
+            q.Enqueue("f");
+            WriteLine(q.Dequeue());
+            q.TrimExcess();
+            var llist=new LinkedList<string>();
+
+            var pair=new Pair<string>("123","45600");
+            WriteLine(pair[PairItem.First] + " " + pair[PairItem.Second]);
+            WriteLine();
+
+            #region BinaryTree
+            var familyTree = new BinaryTree<string>("myself")
+            {
+                SubItems = new Pair<BinaryTree<string>>(new BinaryTree<string>("father"),
+                    new BinaryTree<string>("mother"))
+            };
+            familyTree.SubItems.First.SubItems = new Pair<BinaryTree<string>>(new BinaryTree<string>("祖父"), new BinaryTree<string>("祖母"));
+            familyTree.SubItems.Second.SubItems =
+                new Pair<BinaryTree<string>>(new BinaryTree<string>("外祖父"), new BinaryTree<string>("外祖母"));
+            //var binaryTree = bTree[PairItem.First, PairItem.Second, PairItem.Second, PairItem.First];
+            foreach (var fName in familyTree)
+            {
+                WriteLine(fName);
+            }
+            #endregion
+
+            int yield = 1;
+            var emptyCollection = Enumerable.Empty<string>();
+            var ps=new Pair<string>();
+            IPair<object> po =ps;//covariant
+
             //AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             //var token = new CancellationTokenSource();
             //var task = Task.Run(() => PiCalculator.Calculate(15), token.Token);
@@ -349,6 +391,7 @@ end
 
         private static ref byte FindFirstRedEyePixel(in byte[] img)
         {
+            /*img = new byte[9]; //错误, in表示只读传引用*/
             for (var i = 0; i < img.Length; i++)
             {
                 if (img[i] == (byte)ConsoleColor.Red)
@@ -383,7 +426,7 @@ end
             {
                 Write($"{modifier}{(list.Last() == modifier ? null : ",")}");
             }
-
+            list.TrimExcess();
             WriteLine();
         }
     }
