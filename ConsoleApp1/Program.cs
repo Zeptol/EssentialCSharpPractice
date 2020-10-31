@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.ExceptionServices;
+using System.Threading;
 using System.Threading.Tasks;
 using static System.Console;
 using myTimer = System.Timers.Timer;
@@ -318,24 +320,33 @@ end
             var ps=new Pair<string>();
             IPair<object> po =ps;//covariant
 
+            var type = typeof(Nullable<DateTime>);
+            WriteLine(type.ContainsGenericParameters);
+            WriteLine(type.IsGenericType);
+            WriteLine(type.GetGenericArguments().FirstOrDefault());
+
+            //var threadStart=new ThreadStart(DoWork);
+            //ThreadPool.QueueUserWorkItem(DoWork,'+');
+
             //AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-            //var token = new CancellationTokenSource();
-            //var task = Task.Run(() => PiCalculator.Calculate(15), token.Token);
+            var token = new CancellationTokenSource();
+            var task = Task.Run<string>(() => PiCalculator.Calculate(15), token.Token);
             //var task2 = Task.Factory.StartNew(Console.WriteLine, token.Token,
             //    TaskCreationOptions.LongRunning, null);
             ////var task =Task.Run(() => "", token.Token);
             //task.ContinueWith(t => "");
-            //foreach (var busySymbol in Utility.BusySymbols())
-            //{
-            //    if (task.IsCompleted)
-            //    {
-            //        Console.Write('\b');
-            //        break;
-            //    }
+            //WriteLine(Task.CurrentId);//???
+            foreach (var busySymbol in Utility.BusySymbols())
+            {
+                if (task.IsCompleted)
+                {
+                    Write('\b');
+                    break;
+                }
 
-            //    Console.Write(busySymbol);
-            //}
-
+                Write(busySymbol);
+            }
+            task.Wait(token.Token);
             //var faultedTask = task.ContinueWith(t =>
             //{
             //    Trace.Assert(t.IsFaulted);
@@ -377,9 +388,9 @@ end
             //    return true;
             //});
 
-            //Console.WriteLine();
-            //Console.WriteLine(task.Result);
-            //Trace.Assert(task.IsCompleted);
+            WriteLine();
+            WriteLine(task.Result);
+            Trace.Assert(task.IsCompleted);
         }
 
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
@@ -387,7 +398,10 @@ end
             throw new NotImplementedException();
         }
 
-        private static (string a, int b, bool c) DoWork(in int a) => ("", 0, default);
+        private static void DoWork(object state)
+        {
+           var a= ("", 0, default(int));
+        }
 
         private static ref byte FindFirstRedEyePixel(in byte[] img)
         {
@@ -412,6 +426,8 @@ end
             c.StarPoint = 1666;
         }
 
+        [return: Description("return attribute")]
+        [Obsolete]
         static void TestBinarySearch()
         {
             var list = new List<string> { "public", "protected", "private" };
